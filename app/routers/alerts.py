@@ -1,0 +1,71 @@
+from datetime import UTC, datetime
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, status
+
+from app.models import Alert, AlertStatus, AssignIn, CloseAlertIn, Note, NoteIn
+from app.store import Store, get_store, new_id
+
+router = APIRouter(prefix="/alerts", tags=["alerts"])
+StoreDep = Annotated[Store, Depends(get_store)]
+
+
+def _get_alert(store: Store, alert_id: str) -> Alert:
+    alert = store.alerts.get(alert_id)
+    if alert is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Alert not found")
+    return alert
+
+
+def _require_open(alert: Alert) -> None:
+    if alert.status is AlertStatus.CLOSED:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Alert is already closed")
+
+
+@router.get("", response_model=list[Alert])
+def list_alerts(
+    store: StoreDep,
+    alert_status: AlertStatus | None = None,
+    assignee: str | None = None,
+) -> list[Alert]:
+    alerts = sorted(store.alerts.values(), key=lambda a: a.created_at, reverse=True)
+    if alert_status is not None:
+        alerts = [a for a in alerts if a.status is alert_status]
+    if assignee is not None:
+        alerts = [a for a in alerts if a.assignee == assignee]
+    return alerts
+
+
+@router.get("/{alert_id}", response_model=Alert)
+def get_alert(alert_id: str, store: StoreDep) -> Alert:
+    return _get_alert(store, alert_id)
+
+
+@router.post("/{alert_id}/assign", response_model=Alert)
+def assign_alert(alert_id: str, body: AssignIn, store: StoreDep) -> Alert:
+    with store.lock:
+        alert = _get_alert(store, alert_id)
+        _require_open(alert)
+        alert.assignee = body.assignee
+    return alert
+
+
+@router.post("/{alert_id}/notes", response_model=Note, status_code=status.HTTP_201_CREATED)
+def add_note(alert_id: str, body: NoteIn, store: StoreDep) -> Note:
+    with store.lock:
+        alert = _get_alert(store, alert_id)
+        note = Note(id=new_id("note"), author=body.author, text=body.text, created_at=datetime.now(UTC))
+        alert.notes.append(note)
+    return note
+
+
+@router.post("/{alert_id}/close", response_model=Alert)
+def close_alert(alert_id: str, body: CloseAlertIn, store: StoreDep) -> Alert:
+    with store.lock:
+        alert = _get_alert(store, alert_id)
+        _require_open(alert)
+        alert.status = AlertStatus.CLOSED
+        alert.disposition = body.disposition
+        alert.close_reason = body.reason
+        alert.closed_at = datetime.now(UTC)
+    return alert

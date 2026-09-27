@@ -1,0 +1,96 @@
+from datetime import datetime
+from decimal import Decimal
+from enum import StrEnum
+
+from pydantic import BaseModel, Field
+
+
+class TransactionIn(BaseModel):
+    reference: str = Field(min_length=1, max_length=64, examples=["TXN-0001"])
+    amount: Decimal = Field(gt=0, examples=[8200])
+    currency: str = Field(min_length=3, max_length=3, examples=["EUR"])
+    originator_name: str = Field(min_length=1, examples=["Jane Example"])
+    originator_country: str = Field(min_length=2, max_length=2, examples=["NL"])
+    beneficiary_name: str = Field(min_length=1, examples=["Globex Front LLC"])
+    beneficiary_country: str = Field(min_length=2, max_length=2, examples=["XQ"])
+
+
+class RuleHit(BaseModel):
+    rule_id: str
+    detail: str
+    score: int
+
+
+class Decision(StrEnum):
+    CLEAR = "clear"
+    REVIEW = "review"
+
+
+class ScreeningResult(BaseModel):
+    transaction_id: str
+    transaction: TransactionIn
+    decision: Decision
+    risk_score: int
+    hits: list[RuleHit]
+    alert_id: str | None
+    screened_at: datetime
+
+
+class AlertStatus(StrEnum):
+    OPEN = "open"
+    CLOSED = "closed"
+
+
+class Disposition(StrEnum):
+    FALSE_POSITIVE = "false_positive"
+    TRUE_POSITIVE = "true_positive"
+
+
+class Note(BaseModel):
+    id: str
+    author: str
+    text: str
+    created_at: datetime
+
+
+class Alert(BaseModel):
+    id: str
+    transaction_id: str
+    status: AlertStatus
+    risk_score: int
+    hits: list[RuleHit]
+    assignee: str | None = None
+    disposition: Disposition | None = None
+    close_reason: str | None = None
+    notes: list[Note] = []
+    created_at: datetime
+    closed_at: datetime | None = None
+
+
+class NoteIn(BaseModel):
+    author: str = Field(min_length=1)
+    text: str = Field(min_length=1, max_length=2000)
+
+
+class AssignIn(BaseModel):
+    assignee: str = Field(min_length=1)
+
+
+class CloseAlertIn(BaseModel):
+    disposition: Disposition
+    reason: str = Field(min_length=1, max_length=500)
+
+
+class WatchlistEntryIn(BaseModel):
+    name: str = Field(min_length=1)
+    list_name: str = Field(default="SYNTH-SANCTIONS", min_length=1)
+
+
+class WatchlistEntry(WatchlistEntryIn):
+    id: str
+
+
+class Rule(BaseModel):
+    id: str
+    description: str
+    score: int

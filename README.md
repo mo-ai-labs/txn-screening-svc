@@ -13,6 +13,14 @@ uv run uvicorn app.main:app --reload
 
 Then open http://127.0.0.1:8000/docs.
 
+## Test it
+
+```powershell
+uv run pytest
+```
+
+CI (`.github/workflows/ci.yml`, job `test`) runs the same suite on every pull request and on pushes to `main`.
+
 ## Endpoints
 
 | Method | Path | Purpose |
@@ -44,4 +52,6 @@ A total score of 50 or more (capped at 100) means the decision is `review` and a
 ## Layout
 
 - `app/`: the service
+- `tests/`: unit tests (pytest + FastAPI `TestClient`)
+- `.github/workflows/`: CI
 - `infra/`: reserved for humans; agents must not touch it

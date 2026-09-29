@@ -47,6 +47,56 @@ def test_screen_rejects_invalid_payload(client):
     assert response.status_code == 422
 
 
+def test_screen_rejects_lowercase_currency(client):
+    response = client.post("/transactions/screen", json=make_txn(currency="eur"))
+    assert response.status_code == 422
+
+
+def test_screen_rejects_numeric_currency(client):
+    response = client.post("/transactions/screen", json=make_txn(currency="123"))
+    assert response.status_code == 422
+
+
+def test_screen_rejects_lowercase_originator_country(client):
+    response = client.post("/transactions/screen", json=make_txn(originator_country="de"))
+    assert response.status_code == 422
+
+
+def test_screen_rejects_numeric_originator_country(client):
+    response = client.post("/transactions/screen", json=make_txn(originator_country="12"))
+    assert response.status_code == 422
+
+
+def test_screen_rejects_lowercase_beneficiary_country(client):
+    response = client.post("/transactions/screen", json=make_txn(beneficiary_country="de"))
+    assert response.status_code == 422
+
+
+def test_screen_rejects_numeric_beneficiary_country(client):
+    response = client.post("/transactions/screen", json=make_txn(beneficiary_country="12"))
+    assert response.status_code == 422
+
+
+def test_screen_rejects_whitespace_reference(client):
+    response = client.post("/transactions/screen", json=make_txn(reference="   "))
+    assert response.status_code == 422
+
+
+def test_screen_rejects_whitespace_originator_name(client):
+    response = client.post("/transactions/screen", json=make_txn(originator_name="   "))
+    assert response.status_code == 422
+
+
+def test_screen_rejects_whitespace_beneficiary_name(client):
+    response = client.post("/transactions/screen", json=make_txn(beneficiary_name="   "))
+    assert response.status_code == 422
+
+
+def test_screen_rejects_amount_with_more_than_two_decimal_places(client):
+    response = client.post("/transactions/screen", json=make_txn(amount=10.123))
+    assert response.status_code == 422
+
+
 def test_rules_are_listed(client):
     ids = {rule["id"] for rule in client.get("/rules").json()}
     assert ids == {"WATCHLIST_NAME", "HIGH_RISK_COUNTRY", "LARGE_AMOUNT", "ROUND_AMOUNT"}

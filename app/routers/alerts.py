@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.models import Alert, AlertStatus, AssignIn, CloseAlertIn, Note, NoteIn
 from app.store import Store, get_store, new_id
@@ -27,12 +27,15 @@ def list_alerts(
     store: StoreDep,
     alert_status: AlertStatus | None = None,
     assignee: str | None = None,
+    min_risk_score: int | None = Query(default=None, ge=0, le=100),
 ) -> list[Alert]:
     alerts = sorted(store.alerts.values(), key=lambda a: a.created_at, reverse=True)
     if alert_status is not None:
         alerts = [a for a in alerts if a.status is alert_status]
     if assignee is not None:
         alerts = [a for a in alerts if a.assignee == assignee]
+    if min_risk_score is not None:
+        alerts = [a for a in alerts if a.risk_score >= min_risk_score]
     return alerts
 
 

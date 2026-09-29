@@ -1,3 +1,6 @@
+from tests.conftest import make_txn
+
+
 CLOSE_BODY = {"disposition": "false_positive", "reason": "Name-only match, different entity"}
 
 
@@ -17,6 +20,50 @@ def test_list_alerts_filters_by_assignee(client, alert_id):
     client.post(f"/alerts/{alert_id}/assign", json={"assignee": "analyst-1"})
     assert len(client.get("/alerts", params={"assignee": "analyst-1"}).json()) == 1
     assert client.get("/alerts", params={"assignee": "analyst-2"}).json() == []
+
+
+def test_list_alerts_filters_by_min_risk_score(client, alert_id):
+    lower_score = client.post(
+        "/transactions/screen",
+        json=make_txn(reference="TXN-LOWER-SCORE", beneficiary_name="Acme Shell Holdings"),
+    ).json()
+    assert lower_score["risk_score"] == 70
+
+    response = client.get("/alerts", params={"min_risk_score": 100})
+    assert [alert["id"] for alert in response.json()] == [alert_id]
+
+
+def test_list_alerts_includes_alert_at_min_risk_score(client, alert_id):
+    lower_score = client.post(
+        "/transactions/screen",
+        json=make_txn(reference="TXN-THRESHOLD", beneficiary_name="Acme Shell Holdings"),
+    ).json()
+
+    response = client.get("/alerts", params={"min_risk_score": 70})
+    assert {alert["id"] for alert in response.json()} == {alert_id, lower_score["alert_id"]}
+
+
+def test_list_alerts_rejects_min_risk_score_above_100(client):
+    assert client.get("/alerts", params={"min_risk_score": 101}).status_code == 422
+
+
+def test_list_alerts_rejects_min_risk_score_below_0(client):
+    assert client.get("/alerts", params={"min_risk_score": -1}).status_code == 422
+
+
+def test_list_alerts_combines_min_risk_score_with_status_and_assignee(client, alert_id):
+    client.post(f"/alerts/{alert_id}/close", json=CLOSE_BODY)
+    lower_score = client.post(
+        "/transactions/screen",
+        json=make_txn(reference="TXN-ASSIGNED", beneficiary_name="Acme Shell Holdings"),
+    ).json()
+    client.post(f"/alerts/{lower_score['alert_id']}/assign", json={"assignee": "analyst-1"})
+
+    response = client.get(
+        "/alerts",
+        params={"min_risk_score": 70, "alert_status": "open", "assignee": "analyst-1"},
+    )
+    assert [alert["id"] for alert in response.json()] == [lower_score["alert_id"]]
 
 
 def test_get_alert(client, alert_id):

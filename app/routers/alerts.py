@@ -54,6 +54,7 @@ def assign_alert(alert_id: str, body: AssignIn, store: StoreDep) -> Alert:
 def add_note(alert_id: str, body: NoteIn, store: StoreDep) -> Note:
     with store.lock:
         alert = _get_alert(store, alert_id)
+        _require_open(alert)
         note = Note(id=new_id("note"), author=body.author, text=body.text, created_at=datetime.now(UTC))
         alert.notes.append(note)
     return note

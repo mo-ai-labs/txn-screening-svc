@@ -63,6 +63,14 @@ def test_closed_alert_cannot_be_closed_or_assigned(client, alert_id):
     assert client.post(f"/alerts/{alert_id}/assign", json={"assignee": "analyst-1"}).status_code == 409
 
 
+def test_closed_alert_cannot_receive_notes(client, alert_id):
+    client.post(f"/alerts/{alert_id}/close", json=CLOSE_BODY)
+    response = client.post(f"/alerts/{alert_id}/notes", json={"author": "analyst-1", "text": "Follow-up"})
+
+    assert response.status_code == 409
+    assert client.get(f"/alerts/{alert_id}").json()["notes"] == []
+
+
 def test_close_rejects_unknown_disposition(client, alert_id):
     response = client.post(f"/alerts/{alert_id}/close", json={"disposition": "maybe", "reason": "x"})
     assert response.status_code == 422

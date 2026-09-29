@@ -34,7 +34,7 @@ def test_dissimilar_name_does_not_match():
 
 
 def test_high_risk_country_alone_is_below_threshold():
-    decision, score, hits = run(beneficiary_country="zz")
+    decision, score, hits = run(beneficiary_country="ZZ")
     assert decision is Decision.CLEAR
     assert score == 40
     assert rule_ids(hits) == ["HIGH_RISK_COUNTRY"]

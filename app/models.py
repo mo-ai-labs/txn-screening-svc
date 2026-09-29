@@ -2,17 +2,24 @@ from datetime import datetime
 from decimal import Decimal
 from enum import StrEnum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class TransactionIn(BaseModel):
     reference: str = Field(min_length=1, max_length=64, examples=["TXN-0001"])
-    amount: Decimal = Field(gt=0, examples=[8200])
-    currency: str = Field(min_length=3, max_length=3, examples=["EUR"])
+    amount: Decimal = Field(gt=0, decimal_places=2, examples=[8200])
+    currency: str = Field(pattern=r"^[A-Z]{3}$", examples=["EUR"])
     originator_name: str = Field(min_length=1, examples=["Jane Example"])
-    originator_country: str = Field(min_length=2, max_length=2, examples=["NL"])
+    originator_country: str = Field(pattern=r"^[A-Z]{2}$", examples=["NL"])
     beneficiary_name: str = Field(min_length=1, examples=["Globex Front LLC"])
-    beneficiary_country: str = Field(min_length=2, max_length=2, examples=["XQ"])
+    beneficiary_country: str = Field(pattern=r"^[A-Z]{2}$", examples=["XQ"])
+
+    @field_validator("reference", "originator_name", "beneficiary_name")
+    @classmethod
+    def reject_whitespace_only(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("must not be blank")
+        return value
 
 
 class RuleHit(BaseModel):

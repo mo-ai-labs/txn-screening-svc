@@ -1,3 +1,5 @@
+import pytest
+
 from tests.conftest import make_txn
 
 
@@ -43,7 +45,38 @@ def test_get_unknown_transaction_returns_404(client):
 
 
 def test_screen_rejects_invalid_payload(client):
-    response = client.post("/transactions/screen", json=make_txn(amount=-5, currency="EURO"))
+    response = client.post("/transactions/screen", json=make_txn(amount=-5))
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize("currency", ["eur", "123"])
+def test_screen_rejects_invalid_currency(client, currency):
+    response = client.post("/transactions/screen", json=make_txn(currency=currency))
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize(
+    ("field", "country"),
+    [
+        ("originator_country", "de"),
+        ("originator_country", "12"),
+        ("beneficiary_country", "de"),
+        ("beneficiary_country", "12"),
+    ],
+)
+def test_screen_rejects_invalid_country_code(client, field, country):
+    response = client.post("/transactions/screen", json=make_txn(**{field: country}))
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize("field", ["originator_name", "beneficiary_name", "reference"])
+def test_screen_rejects_whitespace_only_text(client, field):
+    response = client.post("/transactions/screen", json=make_txn(**{field: "   "}))
+    assert response.status_code == 422
+
+
+def test_screen_rejects_amount_with_more_than_two_decimal_places(client):
+    response = client.post("/transactions/screen", json=make_txn(amount=10.123))
     assert response.status_code == 422
 
 

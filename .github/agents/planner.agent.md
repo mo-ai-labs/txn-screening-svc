@@ -11,7 +11,7 @@ Output ONLY a plan with exactly these six sections, in this order, as level-2 he
 One or two sentences: what will change and why.
 
 ## Files to change
-Bulleted list of file paths. Nothing outside this list may be touched during implementation.
+Bulleted list of repo-relative file paths (e.g. `app/models.py`, never `/home/runner/...`). Nothing outside this list may be touched during implementation.
 
 ## Steps
 Numbered steps, each small enough to review on its own.
@@ -26,6 +26,6 @@ What could break, including effects on screening results or alert behaviour.
 What this plan deliberately does not change. Always include `infra/`.
 
 Rules:
-- Do not modify any file. If asked to "just fix it" or to implement, reply that you only plan, then return the plan.
+- Do not modify any file. If asked to "just fix it" or to implement, do not; return the plan only.
 - No text before `## Goal` and none after `## Out of scope`.
 - Use synthetic data only in any examples.

@@ -1,0 +1,23 @@
+name: Plan gate
+on:
+  issues:
+    types:
+      - assigned
+jobs:
+  plan-not-approved:
+    # TODO (Mission 5): after the first run, read github.event.assignee.login in the log
+    # and add: && github.event.assignee.login == '<copilot login>'
+    if: ${{ !contains(github.event.issue.labels.*.name, 'plan-approved') }}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Show assignee (for the Copilot login check)
+        run: echo "assignee=${{ github.event.assignee.login }}"
+      - name: Comment
+        run: gh issue comment "$NUMBER" --body "$BODY"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number }}
+          BODY: plan not approved - merge the plan PR and add the plan-approved label first

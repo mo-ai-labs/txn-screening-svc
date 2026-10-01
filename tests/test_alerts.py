@@ -33,6 +33,14 @@ def test_list_alerts_filters_by_min_risk_score(client, alert_id):
     assert [alert["id"] for alert in response.json()] == [alert_id]
 
 
+def test_list_alerts_filters_by_transaction_id(client, alert_id):
+    transaction_id = client.get(f"/alerts/{alert_id}").json()["transaction_id"]
+
+    response = client.get("/alerts", params={"transaction_id": transaction_id})
+
+    assert [alert["id"] for alert in response.json()] == [alert_id]
+
+
 def test_list_alerts_includes_alert_at_min_risk_score(client, alert_id):
     lower_score = client.post(
         "/transactions/screen",
@@ -64,6 +72,33 @@ def test_list_alerts_combines_min_risk_score_with_status_and_assignee(client, al
         params={"min_risk_score": 70, "alert_status": "open", "assignee": "analyst-1"},
     )
     assert [alert["id"] for alert in response.json()] == [lower_score["alert_id"]]
+
+
+def test_list_alerts_combines_transaction_id_with_existing_filters(client, alert_id):
+    client.post(f"/alerts/{alert_id}/close", json=CLOSE_BODY)
+    screened = client.post(
+        "/transactions/screen",
+        json=make_txn(reference="TXN-COMBINED", beneficiary_name="Acme Shell Holdings"),
+    ).json()
+    client.post(f"/alerts/{screened['alert_id']}/assign", json={"assignee": "analyst-1"})
+
+    response = client.get(
+        "/alerts",
+        params={
+            "transaction_id": screened["transaction_id"],
+            "alert_status": "open",
+            "assignee": "analyst-1",
+            "min_risk_score": 70,
+        },
+    )
+
+    assert [alert["id"] for alert in response.json()] == [screened["alert_id"]]
+
+
+def test_list_alerts_returns_empty_list_for_unknown_transaction_id(client):
+    response = client.get("/alerts", params={"transaction_id": "txn_missing"})
+
+    assert response.json() == []
 
 
 def test_get_alert(client, alert_id):

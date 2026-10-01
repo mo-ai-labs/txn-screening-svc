@@ -1,0 +1,5 @@
+# Sensitive paths need the code owner's review (once "Require review from Code Owners" is on)
+/.github/          @sheriffMoose
+/infra/            @sheriffMoose
+/app/screening.py  @sheriffMoose
+CODEOWNERS         @sheriffMoose

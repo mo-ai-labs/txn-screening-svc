@@ -28,6 +28,7 @@ def list_alerts(
     alert_status: AlertStatus | None = None,
     assignee: str | None = None,
     min_risk_score: int | None = Query(default=None, ge=0, le=100),
+    transaction_id: str | None = None,
 ) -> list[Alert]:
     alerts = sorted(store.alerts.values(), key=lambda a: a.created_at, reverse=True)
     if alert_status is not None:
@@ -36,6 +37,8 @@ def list_alerts(
         alerts = [a for a in alerts if a.assignee == assignee]
     if min_risk_score is not None:
         alerts = [a for a in alerts if a.risk_score >= min_risk_score]
+    if transaction_id is not None:
+        alerts = [a for a in alerts if a.transaction_id == transaction_id]
     return alerts
 
 

@@ -51,7 +51,7 @@ def get_alert(alert_id: str, store: StoreDep) -> Alert:
 def list_alert_notes(alert_id: str, store: StoreDep) -> list[Note]:
     with store.lock:
         alert = _get_alert(store, alert_id)
-        return list(alert.notes)
+        return sorted(alert.notes, key=lambda note: note.created_at, reverse=True)
 
 
 @router.post("/{alert_id}/assign", response_model=Alert)

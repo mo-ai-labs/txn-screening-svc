@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from tests.conftest import make_txn
 
 
@@ -142,14 +144,17 @@ def test_list_alert_notes_returns_404_for_unknown_alert(client):
     assert response.status_code == 404
 
 
-def test_list_alert_notes_preserves_insertion_order(client, alert_id):
+def test_list_alert_notes_returns_newest_first(client, store, alert_id):
     for text in ("First note", "Second note"):
         client.post(f"/alerts/{alert_id}/notes", json={"author": "analyst-1", "text": text})
+    notes = store.alerts[alert_id].notes
+    notes[0].created_at = datetime(2026, 1, 1, tzinfo=UTC)
+    notes[1].created_at = datetime(2026, 1, 2, tzinfo=UTC)
 
     response = client.get(f"/alerts/{alert_id}/notes")
 
     assert response.status_code == 200
-    assert [note["text"] for note in response.json()] == ["First note", "Second note"]
+    assert [note["text"] for note in response.json()] == ["Second note", "First note"]
 
 
 def test_list_alert_notes_for_closed_alert(client, alert_id):

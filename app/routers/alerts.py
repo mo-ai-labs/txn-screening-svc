@@ -47,6 +47,13 @@ def get_alert(alert_id: str, store: StoreDep) -> Alert:
     return _get_alert(store, alert_id)
 
 
+@router.get("/{alert_id}/notes", response_model=list[Note])
+def list_alert_notes(alert_id: str, store: StoreDep) -> list[Note]:
+    with store.lock:
+        alert = _get_alert(store, alert_id)
+        return list(alert.notes)
+
+
 @router.post("/{alert_id}/assign", response_model=Alert)
 def assign_alert(alert_id: str, body: AssignIn, store: StoreDep) -> Alert:
     with store.lock:

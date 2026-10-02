@@ -129,6 +129,33 @@ def test_add_note(client, alert_id):
     assert [note["text"] for note in notes] == ["Looking into it"]
 
 
+def test_list_alert_notes_returns_empty_list(client, alert_id):
+    response = client.get(f"/alerts/{alert_id}/notes")
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_list_alert_notes_preserves_insertion_order(client, alert_id):
+    for text in ("First note", "Second note"):
+        client.post(f"/alerts/{alert_id}/notes", json={"author": "analyst-1", "text": text})
+
+    response = client.get(f"/alerts/{alert_id}/notes")
+
+    assert response.status_code == 200
+    assert [note["text"] for note in response.json()] == ["First note", "Second note"]
+
+
+def test_list_alert_notes_for_closed_alert(client, alert_id):
+    client.post(f"/alerts/{alert_id}/notes", json={"author": "analyst-1", "text": "Review complete"})
+    client.post(f"/alerts/{alert_id}/close", json=CLOSE_BODY)
+
+    response = client.get(f"/alerts/{alert_id}/notes")
+
+    assert response.status_code == 200
+    assert [note["text"] for note in response.json()] == ["Review complete"]
+
+
 def test_close_alert(client, alert_id):
     response = client.post(f"/alerts/{alert_id}/close", json=CLOSE_BODY)
     assert response.status_code == 200

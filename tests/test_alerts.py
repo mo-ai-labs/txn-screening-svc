@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from tests.conftest import make_txn
 
 
@@ -127,6 +129,42 @@ def test_add_note(client, alert_id):
 
     notes = client.get(f"/alerts/{alert_id}").json()["notes"]
     assert [note["text"] for note in notes] == ["Looking into it"]
+
+
+def test_list_alert_notes_returns_empty_list(client, alert_id):
+    response = client.get(f"/alerts/{alert_id}/notes")
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_list_alert_notes_returns_404_for_unknown_alert(client):
+    response = client.get("/alerts/alt_missing/notes")
+
+    assert response.status_code == 404
+
+
+def test_list_alert_notes_returns_newest_first(client, store, alert_id):
+    for text in ("First note", "Second note"):
+        client.post(f"/alerts/{alert_id}/notes", json={"author": "analyst-1", "text": text})
+    notes = store.alerts[alert_id].notes
+    notes[0].created_at = datetime(2026, 1, 1, tzinfo=UTC)
+    notes[1].created_at = datetime(2026, 1, 2, tzinfo=UTC)
+
+    response = client.get(f"/alerts/{alert_id}/notes")
+
+    assert response.status_code == 200
+    assert [note["text"] for note in response.json()] == ["Second note", "First note"]
+
+
+def test_list_alert_notes_for_closed_alert(client, alert_id):
+    client.post(f"/alerts/{alert_id}/notes", json={"author": "analyst-1", "text": "Review complete"})
+    client.post(f"/alerts/{alert_id}/close", json=CLOSE_BODY)
+
+    response = client.get(f"/alerts/{alert_id}/notes")
+
+    assert response.status_code == 200
+    assert [note["text"] for note in response.json()] == ["Review complete"]
 
 
 def test_close_alert(client, alert_id):

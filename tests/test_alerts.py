@@ -136,6 +136,12 @@ def test_list_alert_notes_returns_empty_list(client, alert_id):
     assert response.json() == []
 
 
+def test_list_alert_notes_returns_404_for_unknown_alert(client):
+    response = client.get("/alerts/alt_missing/notes")
+
+    assert response.status_code == 404
+
+
 def test_list_alert_notes_preserves_insertion_order(client, alert_id):
     for text in ("First note", "Second note"):
         client.post(f"/alerts/{alert_id}/notes", json={"author": "analyst-1", "text": text})

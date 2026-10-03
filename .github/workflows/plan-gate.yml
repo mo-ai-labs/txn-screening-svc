@@ -5,9 +5,10 @@ on:
       - assigned
 jobs:
   plan-not-approved:
-    # TODO (Mission 5): after the first run, read github.event.assignee.login in the log
-    # and add: && github.event.assignee.login == '<copilot login>'
-    if: ${{ !contains(github.event.issue.labels.*.name, 'plan-approved') }}
+    # Assigning Copilot also assigns the human who started the task, so every assignment
+    # fires two `assigned` events. Only gate the Copilot one (login confirmed in the
+    # "Show assignee" step of runs #7/#8: `Copilot` and `sheriffMoose`).
+    if: ${{ github.event.assignee.login == 'Copilot' && !contains(github.event.issue.labels.*.name, 'plan-approved') }}
     runs-on: ubuntu-latest
     permissions:
       issues: write

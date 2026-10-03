@@ -145,7 +145,7 @@ Sources: [Build reliable workflows — Outputs are workflow contracts](https://l
 
 *Skipped: How hooks enforce guardrails and audit logging, back in Week 2 Day 6 (Capstone 2).*
 
-- [ ] Module assessment / Knowledge Check passed: score ___
+- [x] Module assessment / Knowledge Check passed
 
 ## Mission 9 — Write-up
 
@@ -221,11 +221,11 @@ Alternatives considered: a workflow that writes the plan PR (removes the manual 
 
 ## Done when
 
-- [ ] **3 merged PRs**, each linking its approved plan
-- [ ] `notes/capstone-1.md` has timings per stage and every intervention with its reason
-- [ ] Learn module 2 (Designing Agent Architecture and SDLC Integration) finished
+- [x] **3 merged PRs**, each linking its approved plan
+- [x] `notes/capstone-1.md` has timings per stage and every intervention with its reason
+- [x] Learn module 2 (Designing Agent Architecture and SDLC Integration) finished
 
 ## Reflection
 
-- Which stage would I automate next, and which must stay human?
-- Financial-crime angle: if this pipeline ran on a real screening service, which intervention today would have been a reportable control failure?
+- **Which stage would I automate next, and which must stay human?** Automate the **plan PR** (a workflow writes `plans/<issue>.md` and opens the PR, so the planner stays read-only); keep the **plan review** human, because every real catch today happened there (3 of 3 plans changed).
+- **Financial-crime angle: which moment would have been a reportable control failure?** The **`@copilot` fix rounds running outside the agent boundary**: the session log says `Proceeding without custom agent`, so the implementer's file-scope rule (*change only files in the approved plan*) silently stops applying after the first run. On a real screening service that's an unapproved change path into production code: a review-comment fix could touch screening rules with no plan behind it, and only the human PR review would stand between it and `main`.

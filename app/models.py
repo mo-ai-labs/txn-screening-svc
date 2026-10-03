@@ -15,6 +15,10 @@ class TransactionIn(BaseModel):
     beneficiary_country: str = Field(pattern=r"^[A-Z]{2}$", examples=["XQ"])
 
 
+class BulkTransactionIn(BaseModel):
+    transactions: list[TransactionIn] = Field(min_length=1, max_length=100)
+
+
 class RuleHit(BaseModel):
     rule_id: str
     detail: str

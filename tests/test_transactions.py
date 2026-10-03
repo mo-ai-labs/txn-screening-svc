@@ -50,6 +50,16 @@ def test_screen_rejects_invalid_payload(client):
     assert response.status_code == 422
 
 
+def test_screen_rejects_zero_amount(client):
+    response = client.post("/transactions/screen", json=make_txn(amount=0))
+    assert response.status_code == 422
+
+
+def test_screen_rejects_negative_amount(client):
+    response = client.post("/transactions/screen", json=make_txn(amount=-0.01))
+    assert response.status_code == 422
+
+
 def test_screen_rejects_lowercase_currency(client):
     response = client.post("/transactions/screen", json=make_txn(currency="eur"))
     assert response.status_code == 422
@@ -70,8 +80,18 @@ def test_screen_rejects_numeric_originator_country(client):
     assert response.status_code == 422
 
 
+def test_screen_rejects_three_letter_originator_country(client):
+    response = client.post("/transactions/screen", json=make_txn(originator_country="XQZ"))
+    assert response.status_code == 422
+
+
 def test_screen_rejects_lowercase_beneficiary_country(client):
     response = client.post("/transactions/screen", json=make_txn(beneficiary_country="de"))
+    assert response.status_code == 422
+
+
+def test_screen_rejects_three_letter_beneficiary_country(client):
+    response = client.post("/transactions/screen", json=make_txn(beneficiary_country="XQZ"))
     assert response.status_code == 422
 
 

@@ -67,6 +67,26 @@ def test_same_high_risk_country_on_both_sides_counts_once():
     assert score == 40
 
 
+def test_amount_below_large_amount_does_not_trigger_large_amount():
+    _, _, hits = run(amount=Decimal("7499.99"))
+    assert "LARGE_AMOUNT" not in rule_ids(hits)
+
+
+def test_amount_at_large_amount_triggers_large_amount():
+    _, _, hits = run(amount=Decimal("7500.00"))
+    assert rule_ids(hits) == ["LARGE_AMOUNT"]
+
+
+def test_round_amount_triggers_round_amount():
+    _, _, hits = run(amount=Decimal("1000"))
+    assert rule_ids(hits) == ["ROUND_AMOUNT"]
+
+
+def test_amount_below_round_amount_does_not_trigger_round_amount():
+    _, _, hits = run(amount=Decimal("999.99"))
+    assert rule_ids(hits) == []
+
+
 def test_large_amount_plus_high_risk_country_triggers_review():
     decision, score, hits = run(amount=Decimal("7600.10"), beneficiary_country="XR")
     assert decision is Decision.REVIEW

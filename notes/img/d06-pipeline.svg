@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 410" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<defs><marker id="ah" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#1e1e1e"/></marker><marker id="ahr" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#e03131"/></marker></defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="590" y="50" font-size="22" text-anchor="middle" fill="#1e1e1e">Capstone 1: one issue through the pipeline (x3, stopwatch running)</text>
+<rect x="30" y="110" width="250" height="110" rx="14" fill="#d0ebff" stroke="#1e1e1e" stroke-width="2"/>
+<text x="155.0" y="147.9" font-size="18" text-anchor="middle" fill="#1e1e1e" font-weight="600">⏱ 1 Planner run</text>
+<text x="155.0" y="171.3" font-size="18" text-anchor="middle" fill="#1e1e1e">agent · read-only</text>
+<text x="155.0" y="194.7" font-size="18" text-anchor="middle" fill="#1e1e1e">→ plans/&lt;issue&gt;.md PR</text>
+<rect x="320" y="110" width="250" height="110" rx="14" fill="#fff3bf" stroke="#1e1e1e" stroke-width="2"/>
+<text x="445.0" y="147.9" font-size="18" text-anchor="middle" fill="#1e1e1e" font-weight="600">⏱ 2 Plan review</text>
+<text x="445.0" y="171.3" font-size="18" text-anchor="middle" fill="#1e1e1e">human · checklist 3½ min</text>
+<text x="445.0" y="194.7" font-size="18" text-anchor="middle" fill="#1e1e1e">→ merge + plan-approved</text>
+<rect x="610" y="110" width="250" height="110" rx="14" fill="#d0ebff" stroke="#1e1e1e" stroke-width="2"/>
+<text x="735.0" y="147.9" font-size="18" text-anchor="middle" fill="#1e1e1e" font-weight="600">⏱ 3 Implementer run</text>
+<text x="735.0" y="171.3" font-size="18" text-anchor="middle" fill="#1e1e1e">agent · copilot/ branch</text>
+<text x="735.0" y="194.7" font-size="18" text-anchor="middle" fill="#1e1e1e">→ PR linking the plan</text>
+<rect x="900" y="110" width="250" height="110" rx="14" fill="#fff3bf" stroke="#1e1e1e" stroke-width="2"/>
+<text x="1025.0" y="147.9" font-size="18" text-anchor="middle" fill="#1e1e1e" font-weight="600">⏱ 4 PR review + merge</text>
+<text x="1025.0" y="171.3" font-size="18" text-anchor="middle" fill="#1e1e1e">human · plan vs diff, CI</text>
+<text x="1025.0" y="194.7" font-size="18" text-anchor="middle" fill="#1e1e1e">→ merged</text>
+<line x1="285" y1="165.0" x2="315" y2="165.0" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="575" y1="165.0" x2="605" y2="165.0" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="865" y1="165.0" x2="895" y2="165.0" stroke="#1e1e1e" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="155.0" y1="265" x2="155.0" y2="228" stroke="#e03131" stroke-width="2" marker-end="url(#ahr)"/>
+<text x="155.0" y="290" font-size="15" text-anchor="middle" fill="#e03131">✋ steer / stop</text>
+<line x1="445.0" y1="265" x2="445.0" y2="228" stroke="#e03131" stroke-width="2" marker-end="url(#ahr)"/>
+<text x="445.0" y="290" font-size="15" text-anchor="middle" fill="#e03131">✋ request changes · reject</text>
+<line x1="735.0" y1="265" x2="735.0" y2="228" stroke="#e03131" stroke-width="2" marker-end="url(#ahr)"/>
+<text x="735.0" y="290" font-size="15" text-anchor="middle" fill="#e03131">✋ steer / stop</text>
+<line x1="1025.0" y1="265" x2="1025.0" y2="228" stroke="#e03131" stroke-width="2" marker-end="url(#ahr)"/>
+<text x="1025.0" y="290" font-size="15" text-anchor="middle" fill="#e03131">✋ @copilot fix · approve workflows</text>
+<text x="30" y="355" font-size="15" text-anchor="start" fill="#495057">Blue = agent stage   Yellow = human gate   Red ✋ = intervention → log what + why</text>
+<text x="30" y="382" font-size="15" text-anchor="start" fill="#495057">Bet A: which ⏱ is longest on average?   Bet B: how many ✋ in total?</text>
+</svg>

@@ -1,6 +1,14 @@
 from decimal import Decimal
 
 from app.models import Decision, TransactionIn
+from app.rules import (
+    HIGH_RISK_COUNTRIES,
+    LARGE_AMOUNT,
+    NAME_MATCH_THRESHOLD,
+    REVIEW_THRESHOLD,
+    ROUND_AMOUNT_STEP,
+    RULES,
+)
 from app.screening import screen
 from app.store import Store
 from tests.conftest import make_txn
@@ -12,6 +20,20 @@ def run(**overrides):
 
 def rule_ids(hits):
     return sorted(hit.rule_id for hit in hits)
+
+
+def test_rules_constants_unchanged():
+    assert HIGH_RISK_COUNTRIES == {"XQ", "XR", "ZZ"}
+    assert LARGE_AMOUNT == Decimal("7500")
+    assert ROUND_AMOUNT_STEP == Decimal("1000")
+    assert NAME_MATCH_THRESHOLD == 0.85
+    assert REVIEW_THRESHOLD == 50
+    assert [(rule.id, rule.description, rule.score) for rule in RULES] == [
+        ("WATCHLIST_NAME", "Party name fuzzy-matches a watchlist entry", 70),
+        ("HIGH_RISK_COUNTRY", "Party is in a high-risk (synthetic) jurisdiction", 40),
+        ("LARGE_AMOUNT", f"Amount is at least {LARGE_AMOUNT}", 20),
+        ("ROUND_AMOUNT", f"Amount is an exact multiple of {ROUND_AMOUNT_STEP}", 10),
+    ]
 
 
 def test_clean_transaction_is_cleared():

@@ -1,23 +1,16 @@
 """Screening rules. Every name, country code and threshold here is invented."""
 
-from decimal import Decimal
 from difflib import SequenceMatcher
 
-from app.models import Decision, Rule, RuleHit, TransactionIn, WatchlistEntry
-
-# ISO 3166 user-assigned codes, so they can never collide with a real country.
-HIGH_RISK_COUNTRIES = {"XQ", "XR", "ZZ"}
-LARGE_AMOUNT = Decimal("7500")
-ROUND_AMOUNT_STEP = Decimal("1000")
-NAME_MATCH_THRESHOLD = 0.85
-REVIEW_THRESHOLD = 50
-
-RULES = [
-    Rule(id="WATCHLIST_NAME", description="Party name fuzzy-matches a watchlist entry", score=70),
-    Rule(id="HIGH_RISK_COUNTRY", description="Party is in a high-risk (synthetic) jurisdiction", score=40),
-    Rule(id="LARGE_AMOUNT", description=f"Amount is at least {LARGE_AMOUNT}", score=20),
-    Rule(id="ROUND_AMOUNT", description=f"Amount is an exact multiple of {ROUND_AMOUNT_STEP}", score=10),
-]
+from app.models import Decision, RuleHit, TransactionIn, WatchlistEntry
+from app.rules import (
+    HIGH_RISK_COUNTRIES,
+    LARGE_AMOUNT,
+    NAME_MATCH_THRESHOLD,
+    REVIEW_THRESHOLD,
+    ROUND_AMOUNT_STEP,
+    RULES,
+)
 _SCORES = {rule.id: rule.score for rule in RULES}
 
 
